@@ -46,7 +46,6 @@ my_transforms = transforms.Compose(
 train_dataset = datasets.CIFAR10(
     root="dataset/", train=True, transform=my_transforms, download=True
 )
-train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
 img_num = 0
 for _ in range(10):
