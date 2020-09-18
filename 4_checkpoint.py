@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Sep 16 23:49:31 2020
+Created on Thu Sep 17 14:11:21 2020
 
 @author: lokeshkvn
 """
@@ -16,6 +16,21 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+
+   
+# device setup 
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+# Hyperparameters setup
+
+input_channel = 1
+num_classes = 10
+learning_rate = 0.001
+batch_size = 64
+num_epochs = 5
+load_model = True
 
 
 # CNN 
@@ -43,20 +58,18 @@ x = torch.randn(64,1,28,28)
 print(model(x).shape)
 
 
-# device setup 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+def save_checkpoint(state, filename = "my_ckpt.pth.tar"):
+    print("=> Saving checkpoint")
+    torch.save(state, filename)
+    
 
-
-# Hyperparameters setup
-
-input_channel = 1
-num_classes = 10
-learning_rate = 0.001
-batch_size = 64
-num_epochs = 5
-
-
+def load_checkpoint(state):
+    print("=> Loading Checkpoint")
+    model.load_state_dict(checkpoint['state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer'])
+    
+ 
 # Load data
 
 train_dataset = datasets.MNIST(root ='dataset/', train= True, transform= transforms.ToTensor(), download=True)
@@ -75,10 +88,17 @@ model = CNN().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(),lr = learning_rate)
 
+if load_model:
+    load_checkpoint(torch.load("my_ckpt.pth.tar"))
 
 # Train Network
 
 for epochs in range(num_epochs):
+    losses = []
+    
+    checkpoint = {'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}
+    if epochs == 2:    
+        save_checkpoint(checkpoint)
     for batch_idx, (data, targets) in enumerate(train_dataloader):
         data = data.to(device =  device)
         targets = targets.to(device = device)
@@ -86,6 +106,7 @@ for epochs in range(num_epochs):
         # forward
         scores = model(data)
         loss = criterion(scores, targets)
+        losses.append(loss.item())
         
         # backward
         optimizer.zero_grad()
@@ -94,6 +115,7 @@ for epochs in range(num_epochs):
         # Gradient descent
         optimizer.step()
         
+    print(f' Loss at {epochs}/{num_epochs} is {loss.item()}')
 
 # Check Accuracy and test
 
