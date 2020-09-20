@@ -22,7 +22,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Load Data
 my_transforms = transforms.Compose(
     [  # Compose makes it possible to have many transforms
-        transforms.Resize((36, 36)),  # Resizes (32,32) to (36,36)
+        transforms.Resize((224, 224)),  # Resizes (32,32) to (36,36)
         transforms.RandomCrop((32, 32)),  # Takes a random (32,32) crop
         transforms.ColorJitter(brightness=0.5),  # Change brightness of image
         transforms.RandomRotation(
